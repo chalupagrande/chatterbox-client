@@ -58,6 +58,21 @@ form input[type=text] {
     font-size: 12px;
     padding: 5px;
 }
+.submit{
+    background-color: blue;
+    color: white;
+    padding:4px;
+    border: none;
+}
+#refresh{
+    background-color: darkgreen;
+    border-radius:3px;
+    color: white;
+    cursor: pointer;
+    padding:3px;
+    text-align: center;
+    width:50px;
+}
 
 .chat {
     padding: 5px;
@@ -67,6 +82,7 @@ form input[type=text] {
 
 .chat .username {
     font-weight: 800;
+    padding: 3px 5px 10px 0px;
 }
 
 .chat:hover {
