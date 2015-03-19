@@ -23,12 +23,10 @@ app.escapeRegExp = function(string){
 }
 
 app.update = function(data){
-
+	data = data.results;
 	for(var i = 0; i < data.length; i++){
 		var curObject = data[i];
 		var $message = $('<div class = "chat"></div>');
-		
-
 		var escaped = app.escapeRegExp(curObject.text);
 		$message.html('<span class = "username">' + curObject.username + ':</span>' + 
 			'</br> <div class = "text">' + escaped + '</div>' );
@@ -67,7 +65,7 @@ app.fetch = function(){
 	  	order : "-createdAt"
 	  },
 	  success: function (data) {
-	  	data = data.results;
+	  	
 	  	app.update(data);
 	  	//update the DOM function
 	    console.log('chatterbox: Message recieved');

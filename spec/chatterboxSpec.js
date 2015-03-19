@@ -81,7 +81,7 @@ describe('chatterbox', function() {
           roomname: 'lobby'
         };
 
-        app.send(message);
+        app.update(message);
 
         expect($('.feed').children().length).to.equal(1);
       });
@@ -98,7 +98,7 @@ describe('chatterbox', function() {
       it('should add a friend upon clicking their username', function(){
         sinon.spy(app, 'addFriend');
 
-        app.addMessage({
+        app.update({
           username: 'Mel Brooks',
           text: 'I didn\'t get a harumph outa that guy.!',
           roomname: 'lobby'
