@@ -1,5 +1,6 @@
 
 var app = {};
+app.rooms = {};
 app.server = 'https://api.parse.com/1/classes/chatterbox';
 // $('.refresh').on('click', function(){
 // 	app.fetch();
@@ -13,7 +14,6 @@ app.refresh = function(){
 app.init = function(){
 	app.fetch();
 	app.username = window.location.search.substr(10);
-
 };// END INIT
 
 app.escapeRegExp = function(string){
@@ -22,16 +22,43 @@ app.escapeRegExp = function(string){
     }
 }
 
-app.update = function(data){
-	data = data.results;
-	for(var i = 0; i < data.length; i++){
+app.filter = function(data){
+    data = data.results;
+    app.rooms['All'] = [];
+    for(var i = 0; i < data.length; i++){
 		var curObject = data[i];
+
 		var $message = $('<div class = "chat"></div>');
+
+		//ESCPING XSS
 		var escaped = app.escapeRegExp(curObject.text);
+
 		$message.html('<span class = "username">' + curObject.username + ':</span>' + 
-			'</br> <div class = "text">' + escaped + '</div>' );
-		$('.feed').append($message);
-	}
+		  '</br> <div class = "text">' + escaped + '</div>' );
+		//Updates rooms
+        if(!app.rooms.hasOwnProperty(curObject.roomname)){
+        	var $option = $("<option value='" +curObject.roomname+ "'>" + curObject.roomname + "</option>")
+        	$("#roomlist").append($option);
+        	app.rooms[curObject.roomname] = [$message]
+        	app.rooms.All.push($message);
+        }
+        else{
+        	app.rooms[curObject.roomname].push($message);
+        	app.rooms.All.push($message);
+        }
+    }
+}
+
+app.update = function(theRoomName){
+  app.clearMessages();
+
+  //ROOM USER WANTS
+  var messageList = app.rooms[theRoomName] || app.rooms['All'];
+
+  //repopulates dom
+  for(var i = 0; i < messageList.length; i++){
+	$('.feed').append(messageList[i]);
+  }
 }
 
 app.send = function(message){
@@ -45,7 +72,7 @@ app.send = function(message){
 	  contentType: 'application/json',
 	  success: function (data) {
 	    console.log('chatterbox: Message sent');
-	    window.location.reload();
+	    // app.update($('#roomlist').val());
 	  },
 	  error: function (data) {
 	    // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -55,7 +82,8 @@ app.send = function(message){
 
 };// END SEND
 
-app.fetch = function(){
+app.fetch = function(roomName){
+	roomName || $('#roomlist').val()
 	$.ajax({
 	  // This is the url you should use to communicate with the parse API server.
 	  url: app.server,
@@ -65,9 +93,9 @@ app.fetch = function(){
 	  	order : "-createdAt"
 	  },
 	  success: function (data) {
-	  	
-	  	app.update(data);
-	  	//update the DOM function
+	  	console.log(data)
+	  	app.filter(data);
+	  	app.update($('#roomlist').val());
 	    console.log('chatterbox: Message recieved');
 	  },
 	  error: function (data) {
@@ -92,9 +120,10 @@ $(document).ready(function(){
 		var message = {
 		  username:  app.username,
 	      text: $('#mess').val(),
-		  roomname: "rooms"
+		  roomname: $('#roomlist').val()
 		}
 		app.send(message);
+		app.fetch();
 		$('#mess').val('');
 
 	});
@@ -103,6 +132,29 @@ $(document).ready(function(){
 	  event.preventDefault();
       window.location.reload();
 	 })
+
+	$('#room').on('click', function(event){
+	  event.preventDefault();
+      var newRoom = prompt('Name your room!');
+      var $option = $("<option value='" +newRoom+ "'>" + newRoom + "</option>")
+      $("#roomlist").prepend($option);
+      var message = {
+		  username: "System",
+	      text: "Welcome to " + newRoom,
+		  roomname: newRoom
+		}
+	  app.send(message);
+	  app.fetch()
+
+
+
+
+	 })
+    
+    $('#roomlist').change(function(){
+    	app.update($('#roomlist').val());
+    })
+
 
 
 });
