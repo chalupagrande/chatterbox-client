@@ -82,8 +82,7 @@ app.send = function(message){
 
 };// END SEND
 
-app.fetch = function(roomName){
-	roomName || $('#roomlist').val()
+app.fetch = function(){
 	$.ajax({
 	  // This is the url you should use to communicate with the parse API server.
 	  url: app.server,
@@ -138,12 +137,13 @@ $(document).ready(function(){
       var newRoom = prompt('Name your room!');
       var $option = $("<option value='" +newRoom+ "'>" + newRoom + "</option>")
       $("#roomlist").prepend($option);
-      var message = {
+      var message2 = {
 		  username: "System",
 	      text: "Welcome to " + newRoom,
 		  roomname: newRoom
 		}
-	  app.send(message);
+	  app.send(message2);
+	  app.clearMessages();
 	  app.fetch()
 
 
